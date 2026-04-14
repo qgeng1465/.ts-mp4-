@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>TS to MP4 无损转换器 (离线版)</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="coi-serviceworker.js"></script>
+    <script src="./lib/ffmpeg.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>TS ⇌ MP4 无损封装工具</h1>
+        <div class="card">
+            <input type="file" id="uploader" accept=".ts">
+            <button id="start-btn" disabled>立即转换 (无损)</button>
+            <div id="status-area">
+                <p id="status-text">请选择 .ts 视频文件</p>
+                <div id="progress-bar-container" style="display:none;">
+                    <div id="progress-bar"></div>
+                </div>
+            </div>
+            <a id="download-link" class="btn-download" style="display: none;">保存 MP4 文件</a>
+        </div>
+        <div class="info">
+            <p><strong>技术原理：</strong> Demuxing & Remuxing (流复制)。不改动原始音视频编码，仅更换封装格式，100% 画质保留。</p>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
