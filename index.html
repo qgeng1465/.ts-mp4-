@@ -2,7 +2,10 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>TS to MP4 无损转换器 (离线版)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="纯浏览器端 TS ⇌ MP4 无损封装工具：流复制、画质零损失、完全离线">
+    <title>TS ⇌ MP4 无损转换器（离线版）</title>
+    <link rel="icon" href="data:,">
     <link rel="stylesheet" href="style.css">
     <script src="coi-serviceworker.js"></script>
     <script src="./lib/ffmpeg.js"></script>
@@ -10,19 +13,21 @@
 <body>
     <div class="container">
         <h1>TS ⇌ MP4 无损封装工具</h1>
+        <p class="subtitle">不重新编码，只更换封装容器，100% 画质保留</p>
         <div class="card">
-            <input type="file" id="uploader" accept=".ts">
-            <button id="start-btn" disabled>立即转换 (无损)</button>
+            <input type="file" id="uploader" accept=".ts,.m2ts,.mts,.mp4">
+            <button id="start-btn" disabled>立即转换（无损）</button>
             <div id="status-area">
-                <p id="status-text">请选择 .ts 视频文件</p>
-                <div id="progress-bar-container" style="display:none;">
+                <p id="status-text">请选择 .ts / .mp4 视频文件</p>
+                <div id="progress-container">
                     <div id="progress-bar"></div>
                 </div>
             </div>
             <a id="download-link" class="btn-download" style="display: none;">保存 MP4 文件</a>
         </div>
         <div class="info">
-            <p><strong>技术原理：</strong> Demuxing & Remuxing (流复制)。不改动原始音视频编码，仅更换封装格式，100% 画质保留。</p>
+            <p><strong>技术原理：</strong> Demuxing &amp; Remuxing（流复制）。不改动原始音视频编码，仅更换封装格式，转换速度极快，画质零损失。</p>
+            <p><strong>隐私：</strong> 所有处理都在本地浏览器完成（WASM），视频文件不会上传到任何服务器。</p>
         </div>
     </div>
     <script src="app.js"></script>
