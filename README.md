@@ -39,3 +39,11 @@ python -m http.server 8000
 ---
 
 如果对你有帮助，欢迎 Star ⭐
+
+---
+
+## ☕ 打赏
+
+如果这个工具对你有帮助，欢迎打赏支持继续开发：
+
+![Support](likes.jpg)
