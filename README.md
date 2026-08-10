@@ -1,28 +1,41 @@
-# TS ⇌ MP4 无损转换器（离线版）
+# TS ⇌ MP4 无损转换器
 
-一个**纯浏览器端**的 TS ⇌ MP4 无损封装工具（只改容器、不重新编码），基于 [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm)。
+纯浏览器端的 TS → MP4 无损封装工具。只更换封装容器，不重新编码，画质零损失，文件不上传任何服务器。
 
-## ✨ 特性
+![界面](screenshot.png)
 
-- 🔄 **TS ⇌ MP4 无损封装**：只换容器、不重编码，速度快、画质零损失
-- 🔒 **完全离线**：所有处理都在浏览器本地完成（WebAssembly），视频文件不会上传到任何服务器
-- 🖥️ **无需安装**：打开网页即用，无需下载任何软件
-- 📦 **内置 FFmpeg**：打包了 WASM 版 FFmpeg，开箱即用
+选中文件后：
 
-## 🚀 使用
+![选中文件](screenshot-file.png)
 
-1. 直接打开 `index.html`（或 clone 后在本地运行）
-2. 拖入 `.ts` 或 `.mp4` 文件
-3. 点击转换，完成后下载
+## 功能
 
-## 🧰 技术栈
+- TS / M2TS / MTS / MP4 → MP4，`-c copy` 流复制，无损快速
+- 输出带 `+faststart`，可边加载边播放
+- 完全离线：基于 FFmpeg.wasm，全部在本地浏览器运行
+- 打开即用，无需安装，无账号
 
-- [FFmpegWASM](https://github.com/ffmpegwasm/ffmpeg.wasm) —— 在浏览器里运行的 FFmpeg
-- 原生 HTML / CSS / JavaScript（无框架）
+## 使用
 
-## ⚠️ 说明
+1. 打开 `index.html`（建议用本地 HTTP 服务访问，避免跨域限制）
+2. 选择 `.ts` 视频文件
+3. 点击「立即转换（无损）」，完成后保存 MP4
 
-- 大文件转换耗时取决于你的电脑性能
-- 仅离线本地运行，隐私安全
+## 原理
 
-> 如果对你有帮助，欢迎 Star ⭐
+```bash
+ffmpeg -i input.ts -c copy -movflags +faststart output.mp4
+```
+
+`-c copy` 表示流复制：不重新编码，直接把音视频流重新封装进 MP4 容器，速度最快、画质无损。
+
+## 本地运行
+
+```bash
+python -m http.server 8000
+# 浏览器打开 http://localhost:8000
+```
+
+---
+
+如果对你有帮助，欢迎 Star ⭐
