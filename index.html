@@ -3,33 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="纯浏览器端 TS ⇌ MP4 无损封装工具：流复制、画质零损失、完全离线">
-    <title>TS ⇌ MP4 无损转换器（离线版）</title>
+    <meta name="description" content="纯浏览器端 TS ⇌ MP4 转换器：多段 .ts 片段智能排序合并成一个 MP4、批量转换、单文件无损封装。FFmpeg.wasm 本地处理，画质零损失，文件不上传任何服务器，完全离线免费。">
+    <meta name="keywords" content="TS转MP4,ts合并,ts片段合并,m3u8转mp4,ts转mp4在线,视频格式转换,ffmpeg,无损">
+    <title>TS ⇌ MP4 转换器 · 多段合并无损转码（纯本地）</title>
     <link rel="icon" href="data:,">
     <link rel="stylesheet" href="style.css">
     <script src="coi-serviceworker.js"></script>
     <script src="./lib/ffmpeg.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>TS ⇌ MP4 无损封装工具</h1>
-        <p class="subtitle">不重新编码，只更换封装容器，100% 画质保留</p>
-        <div class="card">
-            <input type="file" id="uploader" accept=".ts,.m2ts,.mts,.mp4">
-            <button id="start-btn" disabled>立即转换（无损）</button>
-            <div id="status-area">
-                <p id="status-text">请选择 .ts / .mp4 视频文件</p>
-                <div id="progress-container">
-                    <div id="progress-bar"></div>
+    <header class="hero">
+        <div class="wrap">
+            <h1>🎞️ TS ⇌ MP4 无损转换器</h1>
+            <p class="subtitle">多段 .ts 智能合并 · 批量转换 · 单文件封装 —— 全部在浏览器本地完成，画质零损失</p>
+            <div class="badges">
+                <span class="badge">⚡ 支持多段合并</span>
+                <span class="badge">🔒 文件不上传</span>
+                <span class="badge">🆓 免费无注册</span>
+                <span class="badge">📴 完全离线</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="wrap">
+        <!-- 模式切换 -->
+        <div class="tabs" id="modeTabs" role="tablist">
+            <button class="tab" data-mode="single">单个转换</button>
+            <button class="tab active" data-mode="merge">🧩 多段合并</button>
+            <button class="tab" data-mode="batch">批量转换</button>
+        </div>
+        <p class="mode-hint" id="modeHint"></p>
+
+        <!-- 拖放区 -->
+        <div class="card drop-card" id="drop">
+            <div class="drop-icon">📂</div>
+            <p class="drop-title">点击选择 或 拖入视频文件</p>
+            <p class="drop-sub" id="dropSub">支持 .ts / .m2ts / .mts / .mp4 / .mov / .mkv / .avi / .flv / .webm（多段合并模式请拖入全部 .ts 片段）</p>
+            <input type="file" id="fileInput" multiple hidden>
+        </div>
+
+        <!-- 文件列表 -->
+        <div class="card" id="listCard" style="display:none">
+            <div class="list-head">
+                <h3>📑 待处理文件 <span id="fileCount" class="count"></span></h3>
+                <div class="list-actions">
+                    <button class="btn" id="sortBtn" title="按文件名中的数字序号自动排序">↕️ 智能排序</button>
+                    <button class="btn danger" id="clearBtn">🗑️ 清空</button>
                 </div>
             </div>
-            <a id="download-link" class="btn-download" style="display: none;">保存 MP4 文件</a>
+            <ul class="file-list" id="fileList"></ul>
+            <p class="tip" id="mergeTip" style="display:none">💡 合并模式：已自动按数字序号排序（如 seg_1.ts、seg_2.ts … seg_10.ts）。可按住 <b>⋮⋮</b> 手动调整顺序。每个 .ts 片段都会被无损拼接进同一个 MP4。</p>
+            <p class="tip" id="batchTip" style="display:none">💡 批量模式：每个文件独立输出一个文件，逐个处理。</p>
+            <p class="tip warn" id="memWarn" style="display:none"></p>
         </div>
-        <div class="info">
-            <p><strong>技术原理：</strong> Demuxing &amp; Remuxing（流复制）。不改动原始音视频编码，仅更换封装格式，转换速度极快，画质零损失。</p>
-            <p><strong>隐私：</strong> 所有处理都在本地浏览器完成（WASM），视频文件不会上传到任何服务器。</p>
+
+        <!-- 进度 -->
+        <div class="card" id="progressCard" style="display:none">
+            <div class="status-line"><span id="statusText">准备就绪</span><span id="eta" class="eta"></span></div>
+            <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
         </div>
-    </div>
+
+        <!-- 结果 -->
+        <div class="card" id="resultCard" style="display:none">
+            <h3>✅ 转换完成</h3>
+            <div id="resultList"></div>
+        </div>
+
+        <div class="actions">
+            <button class="run-btn" id="startBtn" disabled>🚀 开始转换</button>
+        </div>
+
+        <!-- 原理说明 -->
+        <section class="info">
+            <h3>技术原理</h3>
+            <p><strong>无损封装（Stream Copy）</strong>：TS 片段通常已是 H.264/AAC 编码，与 MP4 容器兼容。我们用 FFmpeg.wasm 只更换封装容器（Demux & Remux），不重新编码，转换速度极快、画质 100% 保留。</p>
+            <p><strong>多段合并（Concat）</strong>：把多个 .ts 片段按顺序拼接（类似 M3U8 分片还原），同样流复制无损合并，输出单个 MP4。</p>
+            <p><strong>智能回退</strong>：若片段编码或分辨率不一致，自动改走 H.264/AAC 重编码，保证一定出结果。</p>
+            <h3>常见问题</h3>
+            <p><strong>为什么要合并多个 .ts？</strong> 直播录制、M3U8 下载工具产出的视频通常被拆成几十上百个 .ts 片段，播放器只能一帧帧播，无法直接分享。本工具把它们按序号拼回完整 MP4。</p>
+            <p><strong>文件大、内存不够怎么办？</strong> 浏览器 WASM 有内存上限（通常 1–2GB）。如果所有片段总大小超过 800MB，建议分批合并或分卷处理。</p>
+            <p><strong>隐私安全吗？</strong> 所有处理都在你的浏览器本地完成，视频文件不会上传到任何服务器。</p>
+        </section>
+
+        <footer class="foot">TS ⇌ MP4 转换器 · 纯浏览器本地运行 · 开源 <a href="https://github.com/qgeng1465/ts-to-mp4-converter">GitHub</a></footer>
+    </main>
+
     <script src="app.js"></script>
 </body>
 </html>
